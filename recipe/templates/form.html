@@ -1,0 +1,19 @@
+{% macro form_macro(form) -%}
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% for f in form %}
+      {% if not string_isinstance(f, 'HiddenField') %}
+	  <label for="{{f.name}}">{{ f.label }}</label>
+	  {{ f }}
+	  {% if f.errors %}
+	    <span class="errors">{{ f.errors|join('|') }}</span>
+	  {% endif %}
+	  {% if f.description %}
+	    <span class="help">{{ f.description }}</span>
+	  {% endif %}
+	</div>
+      {% endif %}
+    {% endfor %}
+    <button type="submit">Submit</button>
+  </form>
+{%- endmacro %}
