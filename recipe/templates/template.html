@@ -16,7 +16,7 @@
     <a href="{{ url_for('index') }}">Index</a>
     {% if current_user.is_authenticated() %}
       <a href="{{ url_for('logout') }}">Logout</a>
-      <a href="{{ url_for('content') }}">Content</a>
+      <a href="{{ url_for('manage_bp.add') }}">Post New</a>
     {% else %}
       <a href="{{ url_for('login') }}">Login</a>
     {% endif %}

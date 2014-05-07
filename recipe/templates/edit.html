@@ -1,0 +1,9 @@
+{% extends "template.html" %}
+{% from "form.html" import form_macro %}
+
+{% block body %}
+  <h1>Edit Recipe</h1>
+
+  {{ form_macro(form) }}
+  
+{% endblock %}

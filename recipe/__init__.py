@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, abort
 from flask.ext.login import LoginManager, login_user, current_user, logout_user, login_required, login_url
-from .models import db, User
+from flask.ext.babel import Babel
+from .models import db, User, Recipe
 from .forms import LoginForm
 
 from flask_debugtoolbar import DebugToolbarExtension
@@ -14,6 +15,7 @@ def app_factory(**kwargs):
     app = Flask(__name__)
     app.config.from_object(config_combined)
     db.init_app(app)
+    Babel(app)
 
     DebugToolbarExtension(app)
 
@@ -27,7 +29,8 @@ def app_factory(**kwargs):
 
     @app.route('/')
     def index():
-        return render_template('index.html')
+        recipes = Recipe.query.order_by(Recipe.posted_on.desc()).all()
+        return render_template('index.html', recipes=recipes)
 
     @app.route('/login/', methods=['GET', 'POST'])
     def login():
@@ -48,11 +51,6 @@ def app_factory(**kwargs):
         logout_user()
         return redirect(url_for('login'))
 
-    @app.route('/content/')
-    @login_required
-    def content():
-        return render_template('content.html')
-
     @app.errorhandler(404)
     def err404(e):
         return render_template('404.html'), 404
@@ -60,5 +58,8 @@ def app_factory(**kwargs):
     @app.errorhandler(500)
     def err500(e):
         return render_template('500.html'), 500
+
+    from .manage_bp import bp_factory as manage_factory
+    app.register_blueprint(manage_factory())
 
     return app
