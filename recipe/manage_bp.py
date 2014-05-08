@@ -3,6 +3,7 @@ from flask.ext.login import login_required
 
 from .models import Recipe, db
 from .forms import RecipeForm
+from datetime import datetime
 
 def bp_factory():
     bp = Blueprint('manage_bp', __name__, template_folder='templates')
@@ -14,6 +15,7 @@ def bp_factory():
         if(f.validate_on_submit()):
             Recipe().save_form(f)
             return redirect(url_for('index'))
+        f.posted_on.data = datetime.now()
         return render_template('add.html', form=f)
 
     @bp.route('/edit/<int:id_>', methods=['GET', 'POST'])
