@@ -4,20 +4,22 @@
   Recipe for Delicious
 {% endblock %}
 
-
 {% block body %}
-  <h1>Recipe for Delicious</h1>
-
   <div class="recipes">
+	{% if recipes %}
 	{% for r in recipes %}
 	  <div class="recipe">
 		<h3>{{ r.title }}</h3>
 		{% if current_user.is_authenticated() %}
 		  <a href="{{ url_for('manage_bp.edit', id_=r.id) }}">Edit this Recipe</a>
+		  <form style="float: right" method="post" action="{{ url_for('manage_bp.delete', id_=r.id) }}"><button type="submit" class="btn btn-default">Delete</button></form>
 		{% endif %}
 		<p>{{ r.posted_on|datetimeformat }}</p>
 		<p>{{ r.content }}</p>
 	  </div>
 	{% endfor %}
+	  {% else %}
+	<p>Nada. Bupkis.</p>
+	{% endif %}
   </div>
 {% endblock %}

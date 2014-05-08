@@ -1,20 +1,30 @@
 {% macro form_macro(form) -%}
-  <form method="post">
-    {{ form.hidden_tag() }}
-    {% for f in form %}
-      {% if not string_isinstance(f, 'HiddenField') %}
-		<div>
-		  <label for="{{f.name}}">{{ f.label }}</label>
-		  {{ f }}
-		  {% if f.errors %}
-			<span class="errors">{{ f.errors|join('|') }}</span>
+  <div class="well">
+	<form method="post" class="form-horizontal">
+	  <fieldset>
+		{{ form.hidden_tag() }}
+		{% for f in form %}
+		  {% if not string_isinstance(f, 'HiddenField') %}
+			<div class="form-group">
+			  <div for="{{f.name}}">{{ f.label(class="col-lg-2 control-label") }}</div>
+			  <div class="col-lg-4">
+				{{ f(class="form-control") }}
+				{% if f.errors %}
+				  <span class="errors">{{ f.errors|join('|') }}</span>
+				{% endif %}
+				{% if f.description %}
+				  <span class="help">{{ f.description }}</span>
+				{% endif %}
+			  </div>
+			</div>
 		  {% endif %}
-		  {% if f.description %}
-			<span class="help">{{ f.description }}</span>
-		  {% endif %}
+		{% endfor %}
+		<div class="form-group">
+		  <div class="col-lg-4 col-lg-offset-2">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		  </div>
 		</div>
-	  {% endif %}
-	{% endfor %}
-    <button type="submit">Submit</button>
-  </form>
+	  </fieldset>
+	</form>
+  </div>
 {%- endmacro %}
