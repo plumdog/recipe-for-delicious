@@ -1,0 +1,7 @@
+{% extends "template.html" %}
+
+{% block body %}
+  <h2>All Ingredients</h2>
+  <a href="{{ url_for('.ingredient_add') }}">Add Ingredient</a>
+  {{ t }}
+{% endblock %}
