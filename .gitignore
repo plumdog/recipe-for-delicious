@@ -55,3 +55,4 @@ docs/_build/
 
 # Project specific things
 config.py
+uploads/

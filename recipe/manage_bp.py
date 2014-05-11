@@ -1,10 +1,14 @@
+import os
+
 from flask import Blueprint, request, url_for, redirect, render_template
 from flask.ext.login import login_required
 from flask_table import Table, Col, LinkCol, ButtonCol
 
-from .models import Recipe, Ingredient, IngredientAmount, db
-from .forms import RecipeForm, IngredientForm, AmountForm
+from .models import Recipe, Ingredient, IngredientAmount, Photo, db
+from .forms import RecipeForm, IngredientForm, AmountForm, PhotoForm
 from datetime import datetime
+
+from werkzeug.utils import secure_filename
 
 
 class IngredientsTable(Table):
@@ -20,10 +24,16 @@ class AmountsTable(Table):
     amount = Col('Amount')
     edit = LinkCol('Edit', '.ingredient_edit', url_kwargs=dict(id_='id'))
     delete = ButtonCol('Delete', '.ingredient_delete', url_kwargs=dict(id_='id'))
+
+
+class ManageBlueprint(Blueprint):
+    def register(self, app, *args):
+        self.config = {'UPLOAD_DIR': app.config['UPLOAD_DIR']}
+        return Blueprint.register(self, app, *args)
     
 
 def bp_factory():
-    bp = Blueprint('manage_bp', __name__, template_folder='templates')
+    bp = ManageBlueprint('manage_bp', __name__, template_folder='templates')
 
     @bp.route('/add', methods=['GET', 'POST'])
     @login_required
@@ -110,6 +120,51 @@ def bp_factory():
         r = Recipe.query.get_or_404(id_)
         r.delete()
         return redirect(url_for('ingredients'))
-        
+
+    def save_upload(upload):
+        if upload and upload.filename:
+            filename = secure_filename(upload.filename)
+            filepath = os.path.join(bp.config['UPLOAD_DIR'], filename)
+            upload.save(filepath)
+            return filename
+        else:
+            return None
+            
+
+    @bp.route('/photos/add/<int:id_>', methods=['GET', 'POST'])
+    @login_required
+    def photo_add(id_):
+        r = Recipe.query.get_or_404(id_)
+        f = PhotoForm(request.form)
+        saved_filename = save_upload(request.files.get('upload'))
+        if f.validate_on_submit():
+            extras=dict(recipe_id=r.id)
+            if saved_filename:
+                extras['saved_filename'] = saved_filename
+
+            Photo().save_form(f, extras=extras)
+            return redirect(url_for('index'))
+        return render_template('photo_add.html', form=f)
+
+    @bp.route('/photos/edit/<int:id_>', methods=['GET', 'POST'])
+    @login_required
+    def photo_edit(id_):
+        p = Photo.query.get_or_404(id_)
+        f = PhotoForm(request.form, obj=p)
+        saved_filename = save_upload(request.files.get('upload'))
+        if f.validate_on_submit():
+            extras=dict()
+            if saved_filename:
+                extras['saved_filename'] = saved_filename
+            p.save_form(f, extras=extras)
+            return redirect(url_for('index'))
+        return render_template('photo_edit.html', form=f)
+
+    @bp.route('/photos/delete/<int:id_>', methods=['POST'])
+    @login_required
+    def photo_delete(id_):
+        p = Photo.query.get_or_404(id_)
+        p.delete()
+        return redirect(url_for('index'))
 
     return bp

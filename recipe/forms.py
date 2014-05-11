@@ -1,8 +1,12 @@
 from flask.ext.wtf import Form
+from flask.ext.wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, TextAreaField, DateTimeField, SelectField
 from wtforms.validators import Required
 
+
 from .models import Ingredient
+
+from config_combined import ALLOWED_EXTENSIONS
 
 
 def int_or_none(val):
@@ -41,3 +45,7 @@ class AmountForm(Form):
     def __init__(self, *args, **kwargs):
         Form.__init__(self, *args, **kwargs)
         self.ingredient_id.choices = Ingredient.dropdown()
+
+class PhotoForm(Form):
+    tag = StringField('Tag', [Required()])
+    upload = FileField('Photo', validators=[FileAllowed(list(ALLOWED_EXTENSIONS), 'Invalid file type. Must be ' + ', '.join(list(ALLOWED_EXTENSIONS)))])

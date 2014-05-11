@@ -1,0 +1,7 @@
+{% extends "template.html" %}
+{% from "form.html" import form_macro %}
+
+{% block body %}
+  <h2>Edit Photo</h2>
+  {{ form_macro(form, multipart=True) }}
+{% endblock %}

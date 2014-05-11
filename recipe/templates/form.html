@@ -1,6 +1,6 @@
-{% macro form_macro(form) -%}
+{% macro form_macro(form, multipart=False) -%}
   <div class="well">
-	<form method="post" class="form-horizontal">
+	<form method="post" class="form-horizontal"{% if multipart %} enctype="multipart/form-data"{% endif %}>
 	  <fieldset>
 		{{ form.hidden_tag() }}
 		{% for f in form %}

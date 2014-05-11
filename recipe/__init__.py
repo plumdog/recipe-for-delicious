@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, flash, url_for, abort
+import os
+
+from flask import Flask, render_template, request, redirect, flash, url_for, abort, send_from_directory
 from flask.ext.login import LoginManager, login_user, current_user, logout_user, login_required, login_url
 from flask.ext.babel import Babel
-from .models import db, User, Recipe
+from .models import db, User, Recipe, Photo
 from .forms import LoginForm
 
 from flask_debugtoolbar import DebugToolbarExtension
@@ -13,7 +15,11 @@ def string_isinstance(obj, cls_name):
 
 def app_factory(**kwargs):
     app = Flask(__name__)
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    config_combined.UPLOAD_DIR = os.path.join(
+        ROOT_DIR, config_combined.UPLOAD_DIR)
     app.config.from_object(config_combined)
+
     db.init_app(app)
     Babel(app)
 
@@ -31,6 +37,11 @@ def app_factory(**kwargs):
     def index():
         recipes = Recipe.query.order_by(Recipe.posted_on.desc()).all()
         return render_template('index.html', recipes=recipes)
+
+    @app.route('/photo/<int:recipe_id>/<string:tag>')
+    def show_photo(recipe_id, tag):
+        p = Photo.query.filter_by(recipe_id=recipe_id, tag=tag).first_or_404()
+        return send_from_directory(app.config['UPLOAD_DIR'], p.saved_filename)
 
     @app.route('/login/', methods=['GET', 'POST'])
     def login():

@@ -1,6 +1,8 @@
 from flask.ext.login import UserMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 
+from .format_post import format_images
+
 db = SQLAlchemy()
 
 
@@ -51,6 +53,9 @@ class Recipe(Base):
     content = db.Column(db.Text)
     posted_on = db.Column(db.DateTime)
 
+    def formatted_post(self):
+        return format_images(self.content, self.id)
+
 
 class Ingredient(Base):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,3 +70,12 @@ class IngredientAmount(Base):
 
     recipe = db.relationship('Recipe', backref=db.backref('ingredient_amounts', lazy='dynamic'))
     ingredient = db.relationship('Ingredient', backref=db.backref('ingredient_amounts', lazy='dynamic'))
+
+
+class Photo(Base):
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'))
+    tag = db.Column(db.String(100))
+    saved_filename = db.Column(db.String(1000))
+
+    recipe = db.relationship('Recipe', backref=db.backref('photos', lazy='dynamic'))
